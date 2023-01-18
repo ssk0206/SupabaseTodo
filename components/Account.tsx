@@ -5,6 +5,7 @@ import {
   Session,
 } from "@supabase/auth-helpers-react";
 import { Database } from "../types/schema";
+import { Button, Container, Input, Grid, Spacer } from "@nextui-org/react";
 
 type Profiles = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -69,9 +70,16 @@ export default function Account({ session }: { session: Session }) {
         updated_at: new Date().toISOString(),
       };
 
-      let { error } = await supabase.from("profiles").upsert(updates);
+      // let { error } = await supabase.from("profiles").upsert(updates).eq();
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({ username: updates.username, website: updates.website })
+        .eq("user_id", updates.user_id)
+        .single();
+
       if (error) throw error;
-      alert("Profile updated!");
+      // alert("Profile updated!");
+      console.log(updates);
     } catch (error) {
       alert("Error updating the data!");
       console.log(error);
@@ -81,48 +89,88 @@ export default function Account({ session }: { session: Session }) {
   }
 
   return (
-    <div className="form-widget">
+    <Container justify="center">
       <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={session.user.email} disabled />
+        <Grid.Container justify="flex-end">
+          <Grid>
+            <Button
+              color={"error"}
+              bordered
+              className="button block"
+              onClick={() => supabase.auth.signOut()}
+            >
+              Sign Out
+            </Button>
+          </Grid>
+        </Grid.Container>
       </div>
+      <Spacer y={4} />
       <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={username || ""}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+        <Grid.Container justify="center">
+          <Grid>
+            <Input
+              label="Email"
+              width="600px"
+              bordered
+              id="email"
+              type="text"
+              value={session.user.email}
+              disabled
+            />
+          </Grid>
+        </Grid.Container>
       </div>
+      <Spacer></Spacer>
       <div>
-        <label htmlFor="website">Website</label>
-        <input
-          id="website"
-          type="website"
-          value={website || ""}
-          onChange={(e) => setWebsite(e.target.value)}
-        />
+        <Grid.Container justify="center">
+          <Grid>
+            <Input
+              label="Username"
+              width="600px"
+              bordered
+              id="username"
+              type="text"
+              value={username || ""}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </Grid>
+        </Grid.Container>
       </div>
-
+      <Spacer />
       <div>
-        <button
-          className="button primary block"
-          onClick={() => updateProfile({ username, website, avatar_url })}
-          disabled={loading}
-        >
-          {loading ? "Loading ..." : "Update"}
-        </button>
+        <Grid.Container justify="center">
+          <Grid>
+            <Input
+              label="Website"
+              width="600px"
+              labelLeft
+              bordered
+              id="website"
+              type="website"
+              value={website || ""}
+              onChange={(e) => setWebsite(e.target.value)}
+            />
+          </Grid>
+        </Grid.Container>
       </div>
-
+      <Spacer y={3} />
       <div>
-        <button
-          className="button block"
-          onClick={() => supabase.auth.signOut()}
-        >
-          Sign Out
-        </button>
+        <Grid.Container justify="center">
+          <Grid>
+            <Button
+              bordered
+              className="button primary block"
+              onClick={() => updateProfile({ username, website, avatar_url })}
+              disabled={loading}
+              color={"success"}
+              borderWeight={"bold"}
+            >
+              {loading ? "Loading ..." : "Update"}
+            </Button>
+          </Grid>
+        </Grid.Container>
       </div>
-    </div>
+      <Spacer />
+    </Container>
   );
 }
