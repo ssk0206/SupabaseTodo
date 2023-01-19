@@ -46,11 +46,11 @@ export default function TodoList({ user }: { user: User }) {
 
   const addTodo = async (taskText: string) => {
     let task = taskText.trim();
-    if (task.length) {
+    if (task.length > 0) {
+      console.log(task);
       const { data } = await supabase
         .from("todos")
-        .insert({ task, user_id: user.id })
-        .single();
+        .insert({ task: `　${task}`, user_id: user.id });
 
       await fetchTodos();
     }
